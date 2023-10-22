@@ -26,12 +26,42 @@ const wss = new WebSocketServer({ server });
 const sockets = []; //여기에 connection을 넣어줌
 //wss.on("여러가지 이벤트들",콜백함수)
 wss.on("connection", (socket) => {
-  sockets.push(socket);
   //여기에서 소켓은 websocet에서 지정한 거임..
+  sockets.push(socket);
+  //   브라우저에서 연결이 추가될 때 작동
+  socket["nickname"] = "익명 사용자";
+  //   누구의 소켓인지 알기 위해서,, 초기값으로 익명
+
   console.log("Connected to Browser!✅");
   socket.on("close", () => console.log("Disconnected from the Browser❌"));
   socket.on("message", (message) => {
-    sockets.forEach((aSocket) => aSocket.send(message.toString("utf8")));
+    const msg = message.toString("utf8"); //버전 문제로 이렇게 써야함
+    console.log(msg); //{"type":"new_message","payload":"ㅁㄴㅇㄻ"}
+    console.log(JSON.parse(msg)); //{ type: 'new_message', payload: 'ㅁㄴㅇㄻ' }=>js object로 바뀜
+    const parsed = JSON.parse(msg);
+    // if (parsed.type === "new_message") {
+    //   //FE에서 보낸 tyoe이 'new_message'인 경우 해당하는 내용인 payload만 걸러서 보내줌
+    //   sockets.forEach((aSocket) => aSocket.send(parsed.payload));
+    // } else if (parsed.type === "nickname") {
+    //   console.log(parsed.payload);
+    // }
+    switch (parsed.type) {
+      case "new_message":
+        sockets.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname}:${parsed.payload}`)
+        );
+        break;
+      case "nickname":
+        // console.log(parsed.payload);
+        // 닉네임을 소켓 안에 넣어 주어야 함
+        socket["nickname"] = parsed.payload;
+        console.log(socket["nickname"]); //
+        break;
+      default:
+        // 다른 모든 경우에 대한 처리를 추가할 수 있습니다.
+        break;
+    }
+
     // socket.send(message.toString("utf8"));
   });
 });
