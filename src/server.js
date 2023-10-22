@@ -27,11 +27,13 @@ wsServer.on("connection", (socket) => {
   //여기에서 socket은 wetSocket의 소켓과 다르다!
   // 왜냐면 socket.io의 socket이니까!!
   //   console.log(socket);
-  socket.on("enter_room", (msg, done) => {
-    console.log(msg);
+  socket.on("enter_room", (roomName, done) => {
+    console.log(roomName);
     setTimeout(() => {
       done();
-    }, 1000);
+      // done()함수를 실행하면 backend에서는 아무일도 일어나지 않는다
+      // front-end에서 backendDone의 실행버튼을 누르는 거라 생각하면 된다!!!
+    }, 3000);
   });
 });
 // const wss = new WebSocketServer({ server });

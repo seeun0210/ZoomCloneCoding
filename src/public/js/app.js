@@ -57,16 +57,22 @@ const form = welcome.querySelector("form");
 function backendDone(msg) {
   console.log(`The backend says:${msg}`);
 }
+function backendDone() {
+  console.log("backend done!");
+}
+
 function handleRoomSubmit(event) {
   event.preventDefault();
   const input = form.querySelector("input");
-  socket.emit("enter_room", { payload: input.value }, () => {
-    console.log("server is done!");
-  });
+  //   결론: 이제 socket.io에서 emit을 통해 모든걸 할 수 있다~~~!!!
+  socket.emit("enter_room", { payload: input.value }, backendDone);
   //   첫번째 인자: 프론트의 emit 과 백의 on이 같은 이름 같은 string이어야 한다
   //   두번째 인자: argument
-  //   여기에서 세번째 인자가 진짜 지리는건데 서버의 함수가 여기에서 호출되는거임
-  //   그래서 server.js에 setTimeout에 있는 done()함수가 여기서 실행되는 거라 볼 수 있음(약간 이해 덜됨)
+  //   세번째 인자(중간에 다른 것들도 보내야하는 경우 마지막인자): 여기에서 세번째 인자가 진짜 지리는건데 서버의 함수가 여기에서 호출되는거임
+  //   ✅주로 서버의 소켓에서 보낸 메시지를 보고 싶을 때 사용한다고 해!
+  //   그래서 server.js에 setTimeout에 있는 done()함수가 여기서 실행되는 거라 볼 수 있음
+  //     그리고 주의해야할 것! 백엔드에서 온 함수를 프론트에서 실행하는 건 괜찮지만, 프론트의 함수를 백엔드에서 실행하는건 엄청난 보안문제라 안된다!!!
+
   input.value = "";
   //   [webSocket]
   //   const msg = { type, payload }; //object를 만들고
