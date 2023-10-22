@@ -36,6 +36,9 @@ function publicRooms() {
   });
   return publicRooms;
 }
+function countRoom(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+}
 wsServer.on("connection", (socket) => {
   socket["nickname"] = "Anon";
   console.log("사용자가 연결되었습니다");
@@ -50,7 +53,7 @@ wsServer.on("connection", (socket) => {
     socket.join(roomName);
     done();
     // socket.to(roomName).emit("welcome");
-    socket.to(roomName).emit("welcome", socket.nickname);
+    socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
     // 이건 메세지를 하나의 소켓에만 보내고
     wsServer.sockets.emit("room_change", publicRooms());
     // 이건 메세지를 모든 소켓에 보내줌
@@ -65,8 +68,10 @@ wsServer.on("connection", (socket) => {
   //  disconnet:완전히 연결이 끊겼다!
   // disconnecting:고객이 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않았다
   socket.on("disconnecting", () => {
-    socket.rooms.forEach((room) =>
-      socket.to(room).emit("bye", socket.nickname)
+    socket.rooms.forEach(
+      (room) =>
+        socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)
+      //   여기에서 -1을 해주는 이유는 떠나기 직전이기때문임
     );
   });
   socket.on("disconnect", () => {
