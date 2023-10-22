@@ -54,18 +54,22 @@ const socket = io();
 // io function: socket.io를 알아서 실행하고 있는 서버를 찾아줌
 const welcome = document.getElementById("welcome");
 const form = welcome.querySelector("form");
-function backendDone(msg) {
-  console.log(`The backend says:${msg}`);
-}
-function backendDone() {
-  console.log("backend done!");
+const room = document.getElementById("room");
+room.hidden = true;
+let roomName;
+function showRoom() {
+  welcome.hidden = true;
+  room.hidden = false;
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName}`;
 }
 
 function handleRoomSubmit(event) {
   event.preventDefault();
   const input = form.querySelector("input");
   //   결론: 이제 socket.io에서 emit을 통해 모든걸 할 수 있다~~~!!!
-  socket.emit("enter_room", { payload: input.value }, backendDone);
+  socket.emit("enter_room", { payload: input.value }, showRoom);
+  roomName = input.value;
   //   첫번째 인자: 프론트의 emit 과 백의 on이 같은 이름 같은 string이어야 한다
   //   두번째 인자: argument
   //   세번째 인자(중간에 다른 것들도 보내야하는 경우 마지막인자): 여기에서 세번째 인자가 진짜 지리는건데 서버의 함수가 여기에서 호출되는거임

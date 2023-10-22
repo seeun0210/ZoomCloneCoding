@@ -28,12 +28,20 @@ wsServer.on("connection", (socket) => {
   // 왜냐면 socket.io의 socket이니까!!
   //   console.log(socket);
   socket.on("enter_room", (roomName, done) => {
+    // socket.onAny((event) => {
+    //   console.log(`Socket Event:${event}`);
+    // });
+    console.log(socket.id); //QrDDcA9_nncDy-jkAAAJ
     console.log(roomName);
-    setTimeout(() => {
-      done();
-      // done()함수를 실행하면 backend에서는 아무일도 일어나지 않는다
-      // front-end에서 backendDone의 실행버튼을 누르는 거라 생각하면 된다!!!
-    }, 3000);
+    console.log("join 전", socket.rooms); //join 전 Set(1) { 'QrDDcA9_nncDy-jkAAAJ' }
+    socket.join(roomName);
+    console.log("join 후", socket.rooms); //join 후 Set(2) { 'QrDDcA9_nncDy-jkAAAJ', { payload: 'asdfafd' } }
+    done();
+    //     setTimeout(() => {
+    //       done("Hello from the back-end");
+    //       // done()함수를 실행하면 backend에서는 아무일도 일어나지 않는다
+    //       // front-end에서 backendDone의 실행버튼을 누르는 거라 생각하면 된다!!!
+    //     }, 3000);
   });
 });
 // const wss = new WebSocketServer({ server });
