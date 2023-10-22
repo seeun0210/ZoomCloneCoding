@@ -2,6 +2,7 @@ import exp from "constants";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 // import { WebSocketServer } from "ws";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -21,7 +22,15 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 //이렇게 해서 서버는 http와 ws 두개의 protocol을 이해할 수 있게 됨
 //항상 이렇게 할 필요는 없고 websocet server만 만들어도 된다.
 const httpServer = http.createServer(app);
-const wsServer = new Server(httpServer);
+const wsServer = new Server(httpServer, {
+  cors: {
+    origin: ["https://admin.socket.io"],
+    credentials: true,
+  },
+});
+instrument(wsServer, {
+  auth: false,
+});
 function publicRooms() {
   const {
     sockets: {
