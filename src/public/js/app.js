@@ -34,6 +34,13 @@ function handleSubmit(event) {
   event.preventDefault(false);
   const input = messageForm.querySelector("input");
   socket.send(makeMessage("new_message", input.value));
+  //   여기에서는 나를 포함한 모든 사람에게 메시지를 보내고 있음.
+  // 나를 제외한 다른 사람 모두에게 메시지를 보내는 것이 로직상 맞음
+  //   어떻게 할까?
+  const li = document.createElement("li");
+  //   const li = document.querySelector("li");
+  li.innerText = `You:${input.value}`;
+  messageList.append(li);
   input.value = "";
 }
 function handleNickSubmit(event) {
