@@ -23,26 +23,39 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 wsServer.on("connection", (socket) => {
+  socket["nickname"] = "Anon";
   console.log("사용자가 연결되었습니다");
   //여기에서 socket은 wetSocket의 소켓과 다르다!
   // 왜냐면 socket.io의 socket이니까!!
   //   console.log(socket);
+  socket.onAny((event) => {
+    console.log(`Socket Event:${event}`);
+  });
   socket.on("enter_room", (roomName, done) => {
-    // socket.onAny((event) => {
-    //   console.log(`Socket Event:${event}`);
-    // });
-    console.log(socket.id); //QrDDcA9_nncDy-jkAAAJ
-    console.log(roomName);
-    console.log("join 전", socket.rooms); //join 전 Set(1) { 'QrDDcA9_nncDy-jkAAAJ' }
     socket.join(roomName);
-    console.log("join 후", socket.rooms); //join 후 Set(2) { 'QrDDcA9_nncDy-jkAAAJ', { payload: 'asdfafd' } }
     done();
+    // socket.to(roomName).emit("welcome");
+    socket.to(roomName).emit("welcome", socket.nickname);
+
     //     setTimeout(() => {
     //       done("Hello from the back-end");
     //       // done()함수를 실행하면 backend에서는 아무일도 일어나지 않는다
     //       // front-end에서 backendDone의 실행버튼을 누르는 거라 생각하면 된다!!!
     //     }, 3000);
   });
+  //   disconect !== disconnecting
+  //  disconnet:완전히 연결이 끊겼다!
+  // disconnecting:고객이 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않았다
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) =>
+      socket.to(room).emit("bye", socket.nickname)
+    );
+  });
+  socket.on("new_message", (msg, room, done) => {
+    socket.to(room).emit("newMessage", `${socket.nickname}:${msg}`);
+    done(); //이건 백엔드에서 실행하지 않는다!
+  });
+  socket.on("nickname", (nickname) => (socket["nickname"] = nickname));
 });
 // const wss = new WebSocketServer({ server });
 //FE로 부터 socket에 대한 정보를 주고받을 수 있다.

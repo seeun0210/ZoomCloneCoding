@@ -57,18 +57,43 @@ const form = welcome.querySelector("form");
 const room = document.getElementById("room");
 room.hidden = true;
 let roomName;
+function addMessage(message) {
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.appendChild(li);
+}
+function handleMessageSubmit(event) {
+  event.preventDefault();
+  const input = room.querySelector("#msg input");
+  const value = input.value;
+  socket.emit("new_message", value, roomName, () => {
+    addMessage(`You:${value}`);
+  });
+  input.value = "";
+}
+function handleNicknameSubmit(event) {
+  event.preventDefault();
+  const input = room.querySelector("#name input");
+  const value = input.value;
+  socket.emit("nickname", value);
+}
 function showRoom() {
   welcome.hidden = true;
   room.hidden = false;
   const h3 = room.querySelector("h3");
   h3.innerText = `Room ${roomName}`;
+  const msgForm = room.querySelector("#msg");
+  const nameForm = room.querySelector("#name");
+  msgForm.addEventListener("submit", handleMessageSubmit);
+  nameForm.addEventListener("submit", handleNicknameSubmit);
 }
 
 function handleRoomSubmit(event) {
   event.preventDefault();
   const input = form.querySelector("input");
   //   결론: 이제 socket.io에서 emit을 통해 모든걸 할 수 있다~~~!!!
-  socket.emit("enter_room", { payload: input.value }, showRoom);
+  socket.emit("enter_room", input.value, showRoom);
   roomName = input.value;
   //   첫번째 인자: 프론트의 emit 과 백의 on이 같은 이름 같은 string이어야 한다
   //   두번째 인자: argument
@@ -76,7 +101,8 @@ function handleRoomSubmit(event) {
   //   ✅주로 서버의 소켓에서 보낸 메시지를 보고 싶을 때 사용한다고 해!
   //   그래서 server.js에 setTimeout에 있는 done()함수가 여기서 실행되는 거라 볼 수 있음
   //     그리고 주의해야할 것! 백엔드에서 온 함수를 프론트에서 실행하는 건 괜찮지만, 프론트의 함수를 백엔드에서 실행하는건 엄청난 보안문제라 안된다!!!
-
+  // [수정] 아까전에 { payload: input.value }이렇게 보냈던걸 string만 보냄일단은..
+  //   { payload: input.value }이렇게 보내니까 roomName은 같은데 자꾸 socket.id가 바뀌는 문제가 발생함
   input.value = "";
   //   [webSocket]
   //   const msg = { type, payload }; //object를 만들고
@@ -90,3 +116,13 @@ function handleRoomSubmit(event) {
   // 백에서 바로 사용 가능
 }
 form.addEventListener("submit", handleRoomSubmit);
+
+socket.on("welcome", (user) => {
+  addMessage(`${user} arrived!`);
+});
+socket.on("bye", (left) => {
+  addMessage(`${left} leftㅠㅠ`);
+});
+socket.on("newMessage", (msg) => {
+  addMessage(msg);
+});
