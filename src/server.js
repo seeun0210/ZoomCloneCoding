@@ -21,4 +21,18 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 //항상 이렇게 할 필요는 없고 websocet server만 만들어도 된다.
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
+//FE로 부터 socket에 대한 정보를 주고받을 수 있다.
+
+const sockets = []; //여기에 connection을 넣어줌
+//wss.on("여러가지 이벤트들",콜백함수)
+wss.on("connection", (socket) => {
+  sockets.push(socket);
+  //여기에서 소켓은 websocet에서 지정한 거임..
+  console.log("Connected to Browser!✅");
+  socket.on("close", () => console.log("Disconnected from the Browser❌"));
+  socket.on("message", (message) => {
+    sockets.forEach((aSocket) => aSocket.send(message.toString("utf8")));
+    // socket.send(message.toString("utf8"));
+  });
+});
 server.listen(3000, handleListen);
