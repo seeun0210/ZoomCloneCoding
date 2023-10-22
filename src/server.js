@@ -51,6 +51,9 @@ wsServer.on("connection", (socket) => {
     done();
     // socket.to(roomName).emit("welcome");
     socket.to(roomName).emit("welcome", socket.nickname);
+    // 이건 메세지를 하나의 소켓에만 보내고
+    wsServer.sockets.emit("room_change", publicRooms());
+    // 이건 메세지를 모든 소켓에 보내줌
 
     //     setTimeout(() => {
     //       done("Hello from the back-end");
@@ -65,6 +68,10 @@ wsServer.on("connection", (socket) => {
     socket.rooms.forEach((room) =>
       socket.to(room).emit("bye", socket.nickname)
     );
+  });
+  socket.on("disconnect", () => {
+    wsServer.sockets.emit("room_change", publicRooms());
+    // 방을 나가면 콘솔에서 방이 사라진걸 확인할 수 있다
   });
   socket.on("new_message", (msg, room, done) => {
     socket.to(room).emit("newMessage", `${socket.nickname}:${msg}`);
