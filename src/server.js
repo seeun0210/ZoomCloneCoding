@@ -22,6 +22,20 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 //항상 이렇게 할 필요는 없고 websocet server만 만들어도 된다.
 const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
+function publicRooms() {
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer;
+  const publicRooms = [];
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key);
+    }
+  });
+  return publicRooms;
+}
 wsServer.on("connection", (socket) => {
   socket["nickname"] = "Anon";
   console.log("사용자가 연결되었습니다");
@@ -29,6 +43,7 @@ wsServer.on("connection", (socket) => {
   // 왜냐면 socket.io의 socket이니까!!
   //   console.log(socket);
   socket.onAny((event) => {
+    console.log(wsServer.sockets.adapter);
     console.log(`Socket Event:${event}`);
   });
   socket.on("enter_room", (roomName, done) => {
