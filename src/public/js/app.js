@@ -52,3 +52,31 @@
 // nickForm.addEventListener("submit", handleNickSubmit);
 const socket = io();
 // io function: socket.io를 알아서 실행하고 있는 서버를 찾아줌
+const welcome = document.getElementById("welcome");
+const form = welcome.querySelector("form");
+function backendDone(msg) {
+  console.log(`The backend says:${msg}`);
+}
+function handleRoomSubmit(event) {
+  event.preventDefault();
+  const input = form.querySelector("input");
+  socket.emit("enter_room", { payload: input.value }, () => {
+    console.log("server is done!");
+  });
+  //   첫번째 인자: 프론트의 emit 과 백의 on이 같은 이름 같은 string이어야 한다
+  //   두번째 인자: argument
+  //   여기에서 세번째 인자가 진짜 지리는건데 서버의 함수가 여기에서 호출되는거임
+  //   그래서 server.js에 setTimeout에 있는 done()함수가 여기서 실행되는 거라 볼 수 있음(약간 이해 덜됨)
+  input.value = "";
+  //   [webSocket]
+  //   const msg = { type, payload }; //object를 만들고
+  //   return JSON.stringify(msg);
+  // 이전에는 이런식으로 문자열만 보낼 수 있었지만
+
+  //   [socket.io]
+  // 이제는 여러개의 argument를 보낼 수 있다.
+  // 이제 JSON으로 안바꿔서 보내도 됨 ㅋ 진작에 알려주지
+  // 이렇게 보내면 백에서 { payload: '김세은의 방' }이런 형태로 뜸
+  // 백에서 바로 사용 가능
+}
+form.addEventListener("submit", handleRoomSubmit);

@@ -23,7 +23,16 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 wsServer.on("connection", (socket) => {
-  console.log(socket);
+  console.log("사용자가 연결되었습니다");
+  //여기에서 socket은 wetSocket의 소켓과 다르다!
+  // 왜냐면 socket.io의 socket이니까!!
+  //   console.log(socket);
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    setTimeout(() => {
+      done();
+    }, 1000);
+  });
 });
 // const wss = new WebSocketServer({ server });
 //FE로 부터 socket에 대한 정보를 주고받을 수 있다.

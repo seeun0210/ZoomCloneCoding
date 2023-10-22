@@ -9,6 +9,9 @@ html(lang="en")
         header 
             h1 Noom
         main 
-        script(src="/socket.io/socket.io.js") 
-        //- socket.io프론트에도 꼭 설치 해줘야함!  
+            div#welcome
+                form
+                    input(type="text",placeholder="room name", required)
+                    button Enter Room
+        script(src="/socket.io/socket.io.js")        
         script(src="/public/js/app.js")
